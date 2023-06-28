@@ -1,11 +1,22 @@
 const express = require('express')
 
-//IMPORTS
+//BANCO
 const conn = require('./db/conn') 
+
+//ROTAS
 const taskRoutes = require('./routes/tasksRoutes') 
+
+//MODELS
 const Users = require('./models/dbUsers')
+const Semanas = require('./models/dbSemana')
+const Dias = require('./models/dbDias')
+const Task = require('./models/dbTask')
+
+const cors = require('cors') 
+
 
 const app = express()
+app.use(cors())
 
 app.use(
     express.urlencoded({
