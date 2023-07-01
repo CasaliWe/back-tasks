@@ -26,6 +26,8 @@ const upload = multer({storage})
 //SALVAR DADOS QUANDO CRIAR CONTA EMAIL E SENHA (IMG, NOME)
 router.post('/salvarDadosStart',upload.single('arquivo'), taskControllers.salvarDados)
 
+//PEGAR DADOS IMAGEM PERFIL E NOME RECEBENDO O UID
+router.post('/pegarNomeImg', taskControllers.pegarNomeImg)
 
 
 
