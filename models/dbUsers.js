@@ -11,7 +11,7 @@ const Users = db.define('User', {
           type: DataTypes.STRING,
           required: true
      },
-     Email: {
+     ImgName: {
           type: DataTypes.STRING,
           required: true
      }

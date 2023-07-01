@@ -1,5 +1,9 @@
 const express = require('express')
 
+//UPLOAD ARQUIVOS
+const multer = require('multer')
+const path = require('path')
+
 //BANCO
 const conn = require('./db/conn') 
 
