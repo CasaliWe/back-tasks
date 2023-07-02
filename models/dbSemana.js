@@ -8,6 +8,10 @@ const Semanas = db.define('Semana', {
      TituloSemana: {
           type: DataTypes.STRING,
           required: true
+     },
+     Uid: {
+          type: DataTypes.STRING,
+          required: true
      }
 })
 

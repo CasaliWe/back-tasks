@@ -29,6 +29,20 @@ router.post('/salvarDadosStart',upload.single('arquivo'), taskControllers.salvar
 //PEGAR DADOS IMAGEM PERFIL E NOME RECEBENDO O UID
 router.post('/pegarNomeImg', taskControllers.pegarNomeImg)
 
+//VERIFICAR DATAS ANTES DE CRIAR NOVA SEMANA
+router.post('/verificarDatasNovaSemana', taskControllers.verificarDatasNovaSemana)
+
+//CRIAR NOVA SEMANA COM NOME E DATAS
+router.post('/criarNovaSemana', taskControllers.criarNovaSemana)
+
+//PEGAR TODAS AS SEMANA PARA EXIBIR NA HOME
+router.post('/pegarSemanasHome', taskControllers.pegarSemanasHome)
+
+//DELETAR SEMANA
+router.post('/deletarSemana', taskControllers.deletarSemana)
+
+//PEGAR DIAS
+router.post('/pegarDias', taskControllers.pegarDias)
 
 
 

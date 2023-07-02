@@ -13,6 +13,10 @@ const Dias = db.define('Dias', {
      FullData: {
         type: DataTypes.DATE,
         required: true
+     },
+     Uid: {
+          type: DataTypes.STRING,
+          required: true
      }
 })
 
