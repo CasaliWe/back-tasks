@@ -1,6 +1,7 @@
 const ModelUsers = require('../models/dbUsers')
 const ModelDias = require('../models/dbDias')
 const ModelSemana = require('../models/dbSemana')
+const ModelTasks = require('../models/dbTask')
 
 const { Op } = require('sequelize');
 
@@ -217,5 +218,95 @@ module.exports = class taskControllers {
                 })
 
                 res.status(200).json(diasRes)
+        }
+
+
+
+
+        //PEGAR TASKS DIA
+        static async pegarTasksDia(req,res){
+              const Uid = req.body.uid
+              const SemanaId = req.body.semanaId
+              const DiaId = req.body.diaId
+
+
+
+              //BUSCANDO TODOS OS DIAS DA SEMANA
+              const dias = await ModelDias.findAll({raw:true, where:{Uid: Uid, SemanaId: SemanaId}})
+
+              //FORMATANDO
+              const diasRes = []
+              dias.forEach((dia)=>{
+                  var dataString = new Date(dia.FullData)
+                  var diaNumero = dataString.getDate()
+                  var diaData = dataString.getDay()  
+                  var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+                  var dia = {id: dia.id, uid: dia.Uid, semanaId: dia.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:dia.FullData}
+                  diasRes.push(dia)
+              })
+
+              
+
+
+              //BUSCANDO O DIA CLICADO JUNTO COM SUAS TASKS
+              const tasks = await ModelDias.findOne({include: ModelTasks, where:{id:DiaId, Uid: Uid, SemanaId: SemanaId}})
+             
+              //FORMATANDO
+              var dataString = new Date(tasks.dataValues.FullData)
+              var diaNumero = dataString.getDate()
+              var diaData = dataString.getDay()  
+              var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+              var taskFull = {tasks: tasks.dataValues.id, uid: tasks.dataValues.Uid, semanaId: tasks.dataValues.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:tasks.dataValues.FullData, tasks: tasks.dataValues.Tasks}
+
+              
+              //FAZENDO A SUBSTITUIÇÃO DO DIA, PELO DIA COM SUAS TASKS
+              diasRes.forEach((dia, i)=>{
+                    if(dia.numero == taskFull.numero){
+                         diasRes[i] = taskFull
+                    }
+              })
+
+  
+              res.status(200).json(diasRes)
+        }
+
+
+
+        //CRIAR TASK
+        static async criarTask(req,res){
+               const uid = req.body.uid
+               const idSemana = req.body.idSemana
+               const idDia = req.body.idDia
+               const hora = req.body.hora
+               const content = req.body.content
+
+               const dados = {
+                  Conteudo: content,
+                  Concluida: false,
+                  HorarioTask: parseInt(hora),
+                  Uid: uid,
+                  SemanaId: idSemana,
+                  DiaId: idDia
+               }
+               
+               //CRIAR TASK
+               await ModelTasks.create(dados)
+               
+               res.status(200).json('Anotação criada!')
+        }
+
+
+
+
+        //EXCLUIR TASK
+        static async excluirTask(req,res){
+              const uid = req.body.uid
+              const semanaId = req.body.semanaId
+              const diaId = req.body.diaId
+              const id = req.body.taskId
+
+              await ModelTasks.destroy({where:{id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId}})
+
+              res.status(200).json('Anotação deletada')
         }
 }

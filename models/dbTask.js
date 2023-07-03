@@ -16,9 +16,13 @@ const Tasks = db.define('Task', {
        required: true
     },
     HorarioTask: {
-       type: DataTypes.TIME,
+       type: DataTypes.INTEGER,
        required: true
-    }
+    },
+    Uid: {
+      type: DataTypes.STRING,
+      required: true
+    },
 })
 
 Users.hasMany(Tasks)

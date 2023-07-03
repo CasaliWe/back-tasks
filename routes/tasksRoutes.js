@@ -44,6 +44,13 @@ router.post('/deletarSemana', taskControllers.deletarSemana)
 //PEGAR DIAS
 router.post('/pegarDias', taskControllers.pegarDias)
 
+//PEGAR TASKS DIA
+router.post('/pegarTasksDia', taskControllers.pegarTasksDia)
+
+//CRIAR TASK
+router.post('/criarTask', taskControllers.criarTask)
+
+router.post('/excluirTask', taskControllers.excluirTask)
 
 
 
