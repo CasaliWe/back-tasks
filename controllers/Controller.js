@@ -309,4 +309,83 @@ module.exports = class taskControllers {
 
               res.status(200).json('Anotação deletada')
         }
+
+
+
+
+        //CONCLUIR TASK
+        static async concluirTask(req,res){
+            const uid = req.body.uid
+            const semanaId = req.body.semanaId
+            const diaId = req.body.diaId
+            const id = req.body.taskId
+
+            const task = await ModelTasks.findOne({ where: { id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId } });
+            const valorAtual = task.Concluida;
+            const novoValor = !valorAtual;
+            await ModelTasks.update({ Concluida: novoValor }, { where: { id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId } });
+
+            res.status(200).json('Tarefa Concluída')
+        }
+
+
+
+        //FAZER PESQUISA
+        static async pesquisaTask(req,res){
+            const uid = req.body.uid;
+            const pesquisa = req.body.pesquisa;
+            
+            //const que terá os dados finais
+            const dadosFinais = []
+             
+            //buscando as tasks da pesquisa
+            const resPesquisa = await ModelTasks.findAll({
+                raw: true,
+                where: {
+                    Uid: uid,
+                    Conteudo: { [Op.like]: `%${pesquisa}%` }
+                }
+            });
+            
+            //verifica se veio alguma task
+            if (resPesquisa.length > 0) {
+                const promises = resPesquisa.map(task => pegarDadosPai(task));
+                await Promise.all(promises);
+            }
+            
+            //func que pega os dados da tabela pai onde tem o dia, e organiza os dados para envia para o front
+            async function pegarDadosPai(task) {
+                
+                //buscando dados tabela pai
+                var pai = await ModelDias.findOne({
+                    raw: true,
+                    where: { id: task.DiaId, Uid: task.Uid }
+                });
+                
+                //ajustando o dia
+                var diaTask = pai.FullData.getDate() < 10 ? '0' + pai.FullData.getDate() : pai.FullData.getDate();
+                var mesTask = pai.FullData.getMonth() + 1 < 10 ? '0' + (pai.FullData.getMonth() + 1) : pai.FullData.getMonth() + 1;
+                var anoTask = pai.FullData.getFullYear()
+                var dataFinalTask = `${diaTask}/${mesTask}/${anoTask}`;
+                
+                //organizando a resposta
+                var resDados = {
+                    data: dataFinalTask,
+                    hora: task.HorarioTask,
+                    conteudo: task.Conteudo,
+                    concluida: task.Concluida,
+                    uid: task.Uid,
+                    semana: task.SemanaId,
+                    dia: task.DiaId,
+                    id: task.id
+                };
+                
+                //salvando no array para enviar para o front 
+                dadosFinais.push(resDados);
+            }
+
+
+            
+            res.status(200).json(dadosFinais);
+        }
 }

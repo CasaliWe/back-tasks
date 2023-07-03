@@ -50,7 +50,14 @@ router.post('/pegarTasksDia', taskControllers.pegarTasksDia)
 //CRIAR TASK
 router.post('/criarTask', taskControllers.criarTask)
 
+//EXCLUIR TASK
 router.post('/excluirTask', taskControllers.excluirTask)
+
+//CONCLUIR TASK
+router.post('/concluirTask', taskControllers.concluirTask)
+
+//PESQUISA
+router.post('/pesquisaTask', taskControllers.pesquisaTask)
 
 
 
