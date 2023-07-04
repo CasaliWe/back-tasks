@@ -55,7 +55,7 @@ module.exports = class taskControllers {
                
                 // Busca as datas no banco
                 const datasBanco = await ModelDias.findAll({raw: true,where:{FullData: datasJaExistentes, Uid: uid}});
-                
+                console.log(datasBanco)
                 // Definir a resposta
                 var inicioFinal = null
 
@@ -78,13 +78,13 @@ module.exports = class taskControllers {
 
                 
                 //SE EXISTIR DATAS JÁ CADASTRADAS, FORMATA TODAS ANTES DE ENVIAR PARA O FRONT
-                if(datasJaExistentes.length > 0){
+                if(datasBanco.length > 0){
                     var datasFormatadasJaExistentes = []
 
-                    datasJaExistentes.forEach((data)=>{
-                        var dia = data.getDate() < 10 ? '0' + data.getDate() : data.getDate()
-                        var mes = data.getMonth() +1 < 10 ? '0' + (data.getMonth() +1) : data.getMonth() +1
-                        var ano = data.getFullYear()
+                    datasBanco.forEach((data)=>{
+                        var dia = data.FullData.getDate() < 10 ? '0' + data.FullData.getDate() : data.FullData.getDate()
+                        var mes = data.FullData.getMonth() +1 < 10 ? '0' + (data.FullData.getMonth() +1) : data.FullData.getMonth() +1
+                        var ano = data.FullData.getFullYear()
                         var dataFinal = `${dia}/${mes}/${ano}`
                         datasFormatadasJaExistentes.push(dataFinal)
                     })
@@ -143,7 +143,7 @@ module.exports = class taskControllers {
         static async pegarSemanasHome(req,res){
               const Uid = req.body.uid
               
-              const semanas = await ModelSemana.findAll({include: ModelDias}, {where:{Uid:Uid}})
+              const semanas = await ModelSemana.findAll({include: ModelDias, where:{Uid:Uid}})
               const semanasDias = semanas.map((result)=> result.get({plain:true}))
 
 
@@ -346,6 +346,8 @@ module.exports = class taskControllers {
                     Conteudo: { [Op.like]: `%${pesquisa}%` }
                 }
             });
+
+            console.log(resPesquisa)
             
             //verifica se veio alguma task
             if (resPesquisa.length > 0) {
@@ -355,7 +357,7 @@ module.exports = class taskControllers {
             
             //func que pega os dados da tabela pai onde tem o dia, e organiza os dados para envia para o front
             async function pegarDadosPai(task) {
-                
+
                 //buscando dados tabela pai
                 var pai = await ModelDias.findOne({
                     raw: true,
