@@ -143,35 +143,43 @@ module.exports = class taskControllers {
         static async pegarSemanasHome(req,res){
               const Uid = req.body.uid
               
-              const semanas = await ModelSemana.findAll({include: ModelDias, where:{Uid:Uid}})
-              const semanasDias = semanas.map((result)=> result.get({plain:true}))
+                try{
+
+                    const semanas = await ModelSemana.findAll({include: ModelDias, where:{Uid:Uid}})
+                    const semanasDias = semanas.map((result)=> result.get({plain:true}))
 
 
-              //PEGANDO NOME, ID E DIAS INICIAL / FINAL
-              var semanaTitleDiaInicialFinal = []
+                    //PEGANDO NOME, ID E DIAS INICIAL / FINAL
+                    var semanaTitleDiaInicialFinal = []
 
-              semanasDias.forEach((semana)=>{ 
-                    //pegando dia, mes e ano INICIO
-                    var dia = semana.Dias[0].FullData.getDate() < 10 ? '0' + semana.Dias[0].FullData.getDate() : semana.Dias[0].FullData.getDate()
-                    var mes = semana.Dias[0].FullData.getMonth() +1 < 10 ? '0' + (semana.Dias[0].FullData.getMonth() +1) : semana.Dias[0].FullData.getMonth() +1
-                    var ano = semana.Dias[0].FullData.getFullYear()
-                    var dataFormatada = `${dia}/${mes}/${ano}`
+                    semanasDias.forEach((semana)=>{ 
+                            //pegando dia, mes e ano INICIO
+                            var dia = semana.Dias[0].FullData.getDate() < 10 ? '0' + semana.Dias[0].FullData.getDate() : semana.Dias[0].FullData.getDate()
+                            var mes = semana.Dias[0].FullData.getMonth() +1 < 10 ? '0' + (semana.Dias[0].FullData.getMonth() +1) : semana.Dias[0].FullData.getMonth() +1
+                            var ano = semana.Dias[0].FullData.getFullYear()
+                            var dataFormatada = `${dia}/${mes}/${ano}`
 
-                    //pegando dia, mes e ano FINAL
-                    var dia2 = semana.Dias[6].FullData.getDate() < 10 ? '0' + semana.Dias[6].FullData.getDate() : semana.Dias[6].FullData.getDate()
-                    var mes2 = semana.Dias[6].FullData.getMonth() +1 < 10 ? '0' +( semana.Dias[6].FullData.getMonth() +1) : semana.Dias[6].FullData.getMonth() +1
-                    var ano2 = semana.Dias[6].FullData.getFullYear()
-                    var data2Formatada = `${dia2}/${mes2}/${ano2}`
-                
-                    var InicioFinal = {inicio: dataFormatada, final: data2Formatada}
+                            //pegando dia, mes e ano FINAL
+                            var dia2 = semana.Dias[6].FullData.getDate() < 10 ? '0' + semana.Dias[6].FullData.getDate() : semana.Dias[6].FullData.getDate()
+                            var mes2 = semana.Dias[6].FullData.getMonth() +1 < 10 ? '0' +( semana.Dias[6].FullData.getMonth() +1) : semana.Dias[6].FullData.getMonth() +1
+                            var ano2 = semana.Dias[6].FullData.getFullYear()
+                            var data2Formatada = `${dia2}/${mes2}/${ano2}`
+                        
+                            var InicioFinal = {inicio: dataFormatada, final: data2Formatada}
 
-                    var infos = {id: semana.id, Titulo: semana.TituloSemana, UserId: semana.Uid, InicioFinal}
-                    
-                    semanaTitleDiaInicialFinal.push(infos)
-              })
+                            var infos = {id: semana.id, Titulo: semana.TituloSemana, UserId: semana.Uid, InicioFinal}
+                            
+                            semanaTitleDiaInicialFinal.push(infos)
+                    })
 
+                    res.status(200).json(semanaTitleDiaInicialFinal)
 
-              res.status(200).json(semanaTitleDiaInicialFinal)
+                }catch(error){
+
+                    res.status(404).json({err: err})
+
+                }
+
         }
 
 
@@ -180,20 +188,28 @@ module.exports = class taskControllers {
         static async deletarSemana(req,res){
               const Uid = req.body.uid
               const Id = req.body.id
-               
-              //PEGANDO OS DIAS PARA DELETAR
-              const idsDias = []
-              const dias = await ModelDias.findAll({raw:true, where:{Uid: Uid, SemanaId: Id}})
-              dias.forEach((dia)=>{
-                  idsDias.push(dia.id)
-              })
+              
+              try {
+
+                  //PEGANDO OS DIAS PARA DELETAR
+                  const idsDias = []
+                  const dias = await ModelDias.findAll({raw:true, where:{Uid: Uid, SemanaId: Id}})
+                  dias.forEach((dia)=>{
+                      idsDias.push(dia.id)
+                  })
 
 
-              //DELETANDO A SEMANA E OS DIAS
-              await ModelDias.destroy({where: {id:idsDias}})
-              await ModelSemana.destroy({where:{id: Id, Uid: Uid}})
+                  //DELETANDO A SEMANA E OS DIAS
+                  await ModelDias.destroy({where: {id:idsDias}})
+                  await ModelSemana.destroy({where:{id: Id, Uid: Uid}})
 
-              res.json('Semana deletada!')
+                  res.status(200).json('Semana deletada!')
+                
+              } catch (error) {
+
+                  res.status(404).json({err: err})
+
+              }
         }
 
 
@@ -204,20 +220,29 @@ module.exports = class taskControllers {
                 const Uid = req.body.uid
                 const Id = req.body.id
 
-                const dias = await ModelDias.findAll({raw:true, where:{Uid: Uid, SemanaId: Id}})
+                try {
 
-                //FORMATANDO A DATA
-                const diasRes = []
-                dias.forEach((dia)=>{
-                    var dataString = new Date(dia.FullData)
-                    var diaNumero = dataString.getDate()
-                    var diaData = dataString.getDay()  
-                    var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-                    var dia = {id: dia.id, uid: dia.Uid, semanaId: dia.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:dia.FullData}
-                    diasRes.push(dia)
-                })
+                    const dias = await ModelDias.findAll({raw:true, where:{Uid: Uid, SemanaId: Id}})
+    
+                    //FORMATANDO A DATA
+                    const diasRes = []
+                    dias.forEach((dia)=>{
+                        var dataString = new Date(dia.FullData)
+                        var diaNumero = dataString.getDate()
+                        var diaData = dataString.getDay()  
+                        var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+                        var dia = {id: dia.id, uid: dia.Uid, semanaId: dia.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:dia.FullData}
+                        diasRes.push(dia)
+                    })
+    
+                    res.status(200).json(diasRes)
+                    
+                } catch (error) {
 
-                res.status(200).json(diasRes)
+                    res.status(404).json({err: error})
+
+                }
+
         }
 
 
@@ -228,46 +253,52 @@ module.exports = class taskControllers {
               const Uid = req.body.uid
               const SemanaId = req.body.semanaId
               const DiaId = req.body.diaId
+           
+              try {
+
+                    //BUSCANDO TODOS OS DIAS DA SEMANA
+                    const dias = await ModelDias.findAll({raw:true, where:{Uid: Uid, SemanaId: SemanaId}})
+
+                    //FORMATANDO
+                    const diasRes = []
+                    dias.forEach((dia)=>{
+                        var dataString = new Date(dia.FullData)
+                        var diaNumero = dataString.getDate()
+                        var diaData = dataString.getDay()  
+                        var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+                        var dia = {id: dia.id, uid: dia.Uid, semanaId: dia.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:dia.FullData}
+                        diasRes.push(dia)
+                    })
+
+                    
 
 
+                    //BUSCANDO O DIA CLICADO JUNTO COM SUAS TASKS
+                    const tasks = await ModelDias.findOne({include: ModelTasks, where:{id:DiaId, Uid: Uid, SemanaId: SemanaId}})
+                    
+                    //FORMATANDO
+                    var dataString = new Date(tasks.dataValues.FullData)
+                    var diaNumero = dataString.getDate()
+                    var diaData = dataString.getDay()  
+                    var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
+                    var taskFull = {tasks: tasks.dataValues.id, uid: tasks.dataValues.Uid, semanaId: tasks.dataValues.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:tasks.dataValues.FullData, tasks: tasks.dataValues.Tasks}
 
-              //BUSCANDO TODOS OS DIAS DA SEMANA
-              const dias = await ModelDias.findAll({raw:true, where:{Uid: Uid, SemanaId: SemanaId}})
+                    
+                    //FAZENDO A SUBSTITUIÇÃO DO DIA, PELO DIA COM SUAS TASKS
+                    diasRes.forEach((dia, i)=>{
+                            if(dia.numero == taskFull.numero){
+                                diasRes[i] = taskFull
+                            }
+                    })
 
-              //FORMATANDO
-              const diasRes = []
-              dias.forEach((dia)=>{
-                  var dataString = new Date(dia.FullData)
-                  var diaNumero = dataString.getDate()
-                  var diaData = dataString.getDay()  
-                  var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-                  var dia = {id: dia.id, uid: dia.Uid, semanaId: dia.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:dia.FullData}
-                  diasRes.push(dia)
-              })
+        
+                    res.status(200).json(diasRes)
+                
+              } catch (error) {
 
-              
-
-
-              //BUSCANDO O DIA CLICADO JUNTO COM SUAS TASKS
-              const tasks = await ModelDias.findOne({include: ModelTasks, where:{id:DiaId, Uid: Uid, SemanaId: SemanaId}})
-             
-              //FORMATANDO
-              var dataString = new Date(tasks.dataValues.FullData)
-              var diaNumero = dataString.getDate()
-              var diaData = dataString.getDay()  
-              var diaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
-              var taskFull = {tasks: tasks.dataValues.id, uid: tasks.dataValues.Uid, semanaId: tasks.dataValues.SemanaId, dia: diaSemana[diaData], numero:diaNumero, full:tasks.dataValues.FullData, tasks: tasks.dataValues.Tasks}
-
-              
-              //FAZENDO A SUBSTITUIÇÃO DO DIA, PELO DIA COM SUAS TASKS
-              diasRes.forEach((dia, i)=>{
-                    if(dia.numero == taskFull.numero){
-                         diasRes[i] = taskFull
-                    }
-              })
-
-  
-              res.status(200).json(diasRes)
+                    res.status(404).json({err: error})
+                
+              }
         }
 
 
@@ -305,9 +336,18 @@ module.exports = class taskControllers {
               const diaId = req.body.diaId
               const id = req.body.taskId
 
-              await ModelTasks.destroy({where:{id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId}})
+              try {
 
-              res.status(200).json('Anotação deletada')
+                 await ModelTasks.destroy({where:{id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId}})
+
+                 res.status(200).json('Anotação deletada')
+                
+              } catch (error) {
+                
+                 res.status(404).json({err: error})
+
+              }
+
         }
 
 
@@ -319,13 +359,21 @@ module.exports = class taskControllers {
             const semanaId = req.body.semanaId
             const diaId = req.body.diaId
             const id = req.body.taskId
+           
+            try {
+                
+                const task = await ModelTasks.findOne({ where: { id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId } });
+                const valorAtual = task.Concluida;
+                const novoValor = !valorAtual;
+                await ModelTasks.update({ Concluida: novoValor }, { where: { id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId } });
 
-            const task = await ModelTasks.findOne({ where: { id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId } });
-            const valorAtual = task.Concluida;
-            const novoValor = !valorAtual;
-            await ModelTasks.update({ Concluida: novoValor }, { where: { id: id, Uid: uid, SemanaId: semanaId, DiaId: diaId } });
+                res.status(200).json('Tarefa Concluída')
 
-            res.status(200).json('Tarefa Concluída')
+            } catch (error) {
+
+                res.status(404).json({err: error})
+                
+            }
         }
 
 
@@ -335,59 +383,66 @@ module.exports = class taskControllers {
             const uid = req.body.uid;
             const pesquisa = req.body.pesquisa;
             
-            //const que terá os dados finais
-            const dadosFinais = []
-             
-            //buscando as tasks da pesquisa
-            const resPesquisa = await ModelTasks.findAll({
-                raw: true,
-                where: {
-                    Uid: uid,
-                    Conteudo: { [Op.like]: `%${pesquisa}%` }
-                }
-            });
-
-            console.log(resPesquisa)
-            
-            //verifica se veio alguma task
-            if (resPesquisa.length > 0) {
-                const promises = resPesquisa.map(task => pegarDadosPai(task));
-                await Promise.all(promises);
-            }
-            
-            //func que pega os dados da tabela pai onde tem o dia, e organiza os dados para envia para o front
-            async function pegarDadosPai(task) {
-
-                //buscando dados tabela pai
-                var pai = await ModelDias.findOne({
+            try {
+                
+                //const que terá os dados finais
+                const dadosFinais = []
+                
+                //buscando as tasks da pesquisa
+                const resPesquisa = await ModelTasks.findAll({
                     raw: true,
-                    where: { id: task.DiaId, Uid: task.Uid }
+                    where: {
+                        Uid: uid,
+                        Conteudo: { [Op.like]: `%${pesquisa}%` }
+                    }
                 });
+    
+                console.log(resPesquisa)
                 
-                //ajustando o dia
-                var diaTask = pai.FullData.getDate() < 10 ? '0' + pai.FullData.getDate() : pai.FullData.getDate();
-                var mesTask = pai.FullData.getMonth() + 1 < 10 ? '0' + (pai.FullData.getMonth() + 1) : pai.FullData.getMonth() + 1;
-                var anoTask = pai.FullData.getFullYear()
-                var dataFinalTask = `${diaTask}/${mesTask}/${anoTask}`;
+                //verifica se veio alguma task
+                if (resPesquisa.length > 0) {
+                    const promises = resPesquisa.map(task => pegarDadosPai(task));
+                    await Promise.all(promises);
+                }
                 
-                //organizando a resposta
-                var resDados = {
-                    data: dataFinalTask,
-                    hora: task.HorarioTask,
-                    conteudo: task.Conteudo,
-                    concluida: task.Concluida,
-                    uid: task.Uid,
-                    semana: task.SemanaId,
-                    dia: task.DiaId,
-                    id: task.id
-                };
+                //func que pega os dados da tabela pai onde tem o dia, e organiza os dados para envia para o front
+                async function pegarDadosPai(task) {
+    
+                    //buscando dados tabela pai
+                    var pai = await ModelDias.findOne({
+                        raw: true,
+                        where: { id: task.DiaId, Uid: task.Uid }
+                    });
+                    
+                    //ajustando o dia
+                    var diaTask = pai.FullData.getDate() < 10 ? '0' + pai.FullData.getDate() : pai.FullData.getDate();
+                    var mesTask = pai.FullData.getMonth() + 1 < 10 ? '0' + (pai.FullData.getMonth() + 1) : pai.FullData.getMonth() + 1;
+                    var anoTask = pai.FullData.getFullYear()
+                    var dataFinalTask = `${diaTask}/${mesTask}/${anoTask}`;
+                    
+                    //organizando a resposta
+                    var resDados = {
+                        data: dataFinalTask,
+                        hora: task.HorarioTask,
+                        conteudo: task.Conteudo,
+                        concluida: task.Concluida,
+                        uid: task.Uid,
+                        semana: task.SemanaId,
+                        dia: task.DiaId,
+                        id: task.id
+                    };
+                    
+                    //salvando no array para enviar para o front 
+                    dadosFinais.push(resDados);
+                }
+    
+                res.status(200).json(dadosFinais);
+
+            } catch (error) {
+
+                res.status(404).json({err: error});
                 
-                //salvando no array para enviar para o front 
-                dadosFinais.push(resDados);
             }
 
-
-            
-            res.status(200).json(dadosFinais);
         }
 }
