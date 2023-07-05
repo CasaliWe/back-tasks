@@ -39,7 +39,7 @@ module.exports = class taskControllers {
                 const data = new Date(dataFront);
 
                 // Extrair dia, mês e ano
-                const dia = data.getDate() +1;
+                const dia = data.getDate();
                 const mes = data.getMonth();
                 const ano = data.getFullYear();
 
@@ -112,7 +112,7 @@ module.exports = class taskControllers {
                 const data = new Date(date);
 
                 // Extrair dia, mês e ano
-                const dia = data.getDate() +1;
+                const dia = data.getDate();
                 const mes = data.getMonth();
                 const ano = data.getFullYear();
 
