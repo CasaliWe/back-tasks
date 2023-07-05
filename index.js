@@ -22,7 +22,7 @@ const cors = require('cors')
 const app = express()
 
 const corsOptions = {
-    origin: ['https://minhasemana.fun', 'https://minhasemana.netlify.app', 'http://localhost:3000']
+    origin: ['https://anotacoes.fun', 'https://minhasemana.netlify.app']
 };
   
 app.use(cors(corsOptions));
