@@ -20,7 +20,13 @@ const cors = require('cors')
 
 
 const app = express()
-app.use(cors())
+
+const corsOptions = {
+    origin: ['https://minhasemana.fun', 'https://minhasemana.netlify.app', 'http://localhost:3000']
+};
+  
+app.use(cors(corsOptions));
+
 
 app.use(
     express.urlencoded({

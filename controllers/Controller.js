@@ -10,7 +10,7 @@ module.exports = class taskControllers {
 
         //SALVAR DADOS APÓS CRIAR COM EMAIL E SENHA
         static async salvarDados(req,res){   
-            const ImgName = 'http://localhost:3000/img/' + req.file.filename;
+            const ImgName = 'https://anotacoes.fun/img/' + req.file.filename;
             const Nome = req.body.nome   
             const Uid = req.body.uid
 
